@@ -90,7 +90,7 @@ workspace "lowpix"
 
         links { "liblowpix", "lua", "glfw" }
 
-        includedirs { "src/lowpix/include", "src-lib/lua", "src-lib/glfw/include" }
+        includedirs { "src/lowpix/include", "src/liblowpix/include", "src-lib/lua", "src-lib/glfw/include" }
         files { "src/lowpix/**.h", "src/lowpix/**.inl", "src/lowpix/**.cpp", "src/lowpix/**.c" }
         defines { "GLEW_STATIC" }
 

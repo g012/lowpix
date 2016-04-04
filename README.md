@@ -1,12 +1,9 @@
 # lowpix
 Tool for programmers to manipulate pixel assets for GBA and such.
 
-## Build
+## License
+Many things are taken from [GRIT](http://www.coranac.com/projects/grit/), which in turn took stuff from [Damian Yerrick's](http://www.pineight.com). As such, lowpix is GPL to comply.
 
-You must generate gl3w code:
-    $ cd src-lib/gl3w
-    $ python gl3w_gen.py
-and glew code:
-    $ cd src-lib/glew
-    $ make
-then generate the projects/makefiles for your platform using premake5.
+## Build
+Generate the projects/makefiles for your platform using premake5.
+

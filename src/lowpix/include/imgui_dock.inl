@@ -947,9 +947,8 @@ namespace ImGui
 		}
 
 
-		void save(const char* filename)
+		void save(FILE* f)
 		{
-			FILE* f = fopen(filename, "wb");
 			fprintf(f, "docks = {\n");
 			for (int i = 0; i < m_docks.size(); ++i)
 			{
@@ -972,7 +971,6 @@ namespace ImGui
 				fprintf(f, i < m_docks.size() - 1 ? "},\n" : "}\n");
 			}
 			fprintf(f, "}\n");
-			fclose(f);
 		}
 
 
@@ -1108,9 +1106,9 @@ namespace ImGui
 		g_dock.end();
 	}
 
-	void SaveDock(const char* filename)
+	void SaveDock(FILE* f)
 	{
-		g_dock.save(filename);
+		g_dock.save(f);
 	}
 
 

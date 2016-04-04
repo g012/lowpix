@@ -1,9 +1,14 @@
 #include "imgui.h"
 #include "imgui_impl_glfw_gl3.h"
+#include "lua.hpp"
 #include <stdio.h>
 #include <thread>
 #include <GL/gl3w.h>
 #include <GLFW/glfw3.h>
+
+#define CONF "lowpix.lua"
+
+extern void LPE_Tick(void);
 
 static void error_callback(int error, const char* description)
 {
@@ -12,6 +17,23 @@ static void error_callback(int error, const char* description)
 
 int main(int, char**)
 {
+	int window_w = 1280, window_h = 720;
+
+	{
+		lua_State* L = luaL_newstate();
+		if (luaL_dofile(L, CONF) == 0)
+		{
+			if (lua_getglobal(L, "window_size") == LUA_TTABLE)
+			{
+				if (lua_getfield(L, -1, "width") == LUA_TNUMBER) window_w = (int)lua_tonumber(L, -1); lua_pop(L, 1);
+				if (lua_getfield(L, -1, "height") == LUA_TNUMBER) window_h = (int)lua_tonumber(L, -1); lua_pop(L, 1);
+			}
+			lua_pop(L, 1);
+			ImGui::LoadDock(L);
+		}
+		lua_close(L);
+	}
+
     // Setup window
     glfwSetErrorCallback(error_callback);
     if (!glfwInit())
@@ -22,7 +44,7 @@ int main(int, char**)
 #if __APPLE__
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
-    GLFWwindow* window = glfwCreateWindow(800, 600, "lowpix", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(window_w, window_h, "lowpix", NULL, NULL);
     glfwMakeContextCurrent(window);
     gl3wInit();
 
@@ -30,47 +52,20 @@ int main(int, char**)
     ImGui_ImplGlfwGL3_Init(window, true);
 	glfwSwapInterval(0);
 
-    bool show_test_window = true;
-    bool show_another_window = false;
     ImVec4 clear_color = ImColor(114, 144, 154);
 
     // Main loop
 	int monitorCount = 0;
 	GLFWmonitor** monitors = glfwGetMonitors(&monitorCount);
 	double refreshPeriod = 1.0 / (monitorCount > 0 && monitors ? glfwGetVideoMode(monitors[0])->refreshRate : 60);
+	if (refreshPeriod < 1.0/60) refreshPeriod = 1.0/60;
 	double t0 = glfwGetTime();
     while (!glfwWindowShouldClose(window))
     {
         glfwPollEvents();
         ImGui_ImplGlfwGL3_NewFrame();
 
-        // 1. Show a simple window
-        // Tip: if we don't call ImGui::Begin()/ImGui::End() the widgets appears in a window automatically called "Debug"
-        {
-            static float f = 0.0f;
-            ImGui::Text("Hello, world!");
-            ImGui::SliderFloat("float", &f, 0.0f, 1.0f);
-            ImGui::ColorEdit3("clear color", (float*)&clear_color);
-            if (ImGui::Button("Test Window")) show_test_window ^= 1;
-            if (ImGui::Button("Another Window")) show_another_window ^= 1;
-            ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-        }
-
-        // 2. Show another simple window, this time using an explicit Begin/End pair
-        if (show_another_window)
-        {
-            ImGui::SetNextWindowSize(ImVec2(200,100), ImGuiSetCond_FirstUseEver);
-            ImGui::Begin("Another Window", &show_another_window);
-            ImGui::Text("Hello");
-            ImGui::End();
-        }
-
-        // 3. Show the ImGui test window. Most of the sample code is in ImGui::ShowTestWindow()
-        if (show_test_window)
-        {
-            ImGui::SetNextWindowPos(ImVec2(650, 20), ImGuiSetCond_FirstUseEver);
-            ImGui::ShowTestWindow(&show_test_window);
-        }
+		LPE_Tick();
 
         // Rendering
         int display_w, display_h;
@@ -80,6 +75,8 @@ int main(int, char**)
         glClear(GL_COLOR_BUFFER_BIT);
         ImGui::Render();
         glfwSwapBuffers(window);
+
+		// delay
 		double t1 = glfwGetTime();
 		if (t1 - t0 >= refreshPeriod)
 			t0 = t1;
@@ -89,6 +86,18 @@ int main(int, char**)
 			t0 = glfwGetTime();
 		}
     }
+
+	{
+		FILE* f = fopen(CONF, "wb");
+		if (f)
+		{
+			int w, h;
+			glfwGetWindowSize(window, &w, &h);
+			fprintf(f, "window_size = { width = %d, height = %d }\n", w, h);
+			ImGui::SaveDock(f);
+			fclose(f);
+		}
+	}
 
     // Cleanup
     ImGui_ImplGlfwGL3_Shutdown();
