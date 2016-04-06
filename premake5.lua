@@ -33,7 +33,7 @@ workspace "lowpix"
         vectorextensions "SSE2"
 
     filter "action:vs*"
-        defines { "WIN32", "_CRT_SECURE_NO_WARNINGS", "_CRT_SECURE_NO_DEPRECATE" }
+        defines { "WIN32", "_CRT_SECURE_NO_WARNINGS", "_CRT_SECURE_NO_DEPRECATE", "_CRT_NONSTDC_NO_DEPRECATE" }
         flags { "MultiProcessorCompile", "NoEditAndContinue", "NoIncrementalLink", "NoManifest", "NoMinimalRebuild" }
 
     project "glfw"
