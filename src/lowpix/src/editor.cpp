@@ -1,11 +1,36 @@
 #include "lowpix.h"
 #include "imgui.h"
 
+#ifdef WIN32
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#define NOC_FILE_DIALOG_WIN32
+#elif defined(__APPLE_CC__) || defined(__APPLE__) || defined(__MACH__)
+#define NOC_FILE_DIALOG_OSX
+#else
+#define NOC_FILE_DIALOG_GTK
+#endif
+#define NOC_FILE_DIALOG_IMPLEMENTATION
+#include "noc_file_dialog.h"
+
 static struct LPE
 {
 	bool exit;
 	bool need_save;
+	struct LPPalette* pal;
 } lpe = { 0 };
+
+static void LPE_OpenPalette(void)
+{
+	if (const char* fn = noc_file_dialog_open(NOC_FILE_DIALOG_OPEN, "All\0*.*\0Photoshop Palette\0*.act\0BMP\0*.bmp\0GIF\0*.gif\0GIMP Palette\0*.gpl\0Microsoft Palette\0*.pal\0PCX\0*.pcx\0PNG\0*.png\0TGA\0*.tga\0", 0, 0))
+	{
+		if (struct LPPalette* pal = lp_pal_load(fn, 0, 0))
+		{
+			if (lpe.pal) lp_alloc(lpe.pal, 0);
+			lpe.pal = pal;
+		}
+	}
+}
 
 void LPE_Tick(void)
 {
@@ -23,7 +48,7 @@ void LPE_Tick(void)
 		if (ImGui::BeginMenu("FILE"))
 		{
 			if (ImGui::MenuItem("New")) { }
-			if (ImGui::MenuItem("Open")) { }
+			if (ImGui::MenuItem("Open")) { LPE_OpenPalette(); }
 			if (ImGui::MenuItem("Save", "Ctrl+S", nullptr, lpe.need_save)) { }
 			if (ImGui::MenuItem("Save As..", nullptr, nullptr, false)) { }
 			ImGui::Separator();
@@ -45,4 +70,26 @@ void LPE_Tick(void)
 
 		ImGui::EndMainMenuBar();
 	}
+
+	if (io.DisplaySize.y > 0)
+	{
+		auto pos = ImVec2(0, ImGui::GetFontSize() + style.FramePadding.y * 2);
+		auto size = ImGui::GetIO().DisplaySize;
+		size.y -= pos.y;
+		ImGui::RootDock(pos, size);
+	}
+
+	if (ImGui::BeginDock("Palette"))
+	{
+		if (lpe.pal)
+		{
+			uint32_t* c = lpe.pal->col;
+			for (uint32_t i = 0; i < lpe.pal->col_count; ++i)
+			{
+				ImGui::ColorButton(ImColor(c[i] | 0xFF<<24).Value, true, false);
+				if ((i+1)%16 > 0) ImGui::SameLine();
+			}
+		}
+	}
+	ImGui::EndDock();
 }

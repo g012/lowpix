@@ -100,6 +100,33 @@ static struct LPPalette* lp_pal_load_bmp(uint8_t* data, size_t sz) // image .bmp
 		pal->col[i] = (uint32_t)data[0] << 16 | (uint32_t)data[1] << 8 | (uint32_t)data[2];
 	return pal;
 }
+static struct LPPalette* lp_pal_load_tga(uint8_t* data, size_t sz) // image .tga
+{
+	if (data[2] != 1 || data[2] != 9) return 0; // not palette based
+	int i = 18 + lp_read_u16_le(data+3); if (sz <= i) return 0;
+	uint32_t cc = lp_read_u16_le(data+5);
+	if (cc > LP_PALCC_MAX) cc = LP_PALCC_MAX;
+	int bpp = data[7];
+	if (bpp != 15 && bpp != 24 && bpp != 32) return 0;
+	data += i;
+	struct LPPalette* pal = lp_alloc(0, offsetof(struct LPPalette, col[cc]));
+	pal->col_count = cc;
+	if (bpp == 15) // RGB 5-5-5
+	{
+		for (uint32_t i = 0; i < cc; ++i, data += 2)
+		{
+			uint32_t rgb = lp_read_u16_le(data);
+			pal->col[i] = ((rgb>>10)&31)*255/31 | ((rgb>>5)&31)*255/31 << 8 | (rgb&31)*255/31 << 16;
+		}
+	}
+	else
+	{
+		int inc = bpp == 24 ? 3 : 4;
+		for (uint32_t i = 0; i < cc; ++i, data += inc)
+			pal->col[i] = (uint32_t)data[0] | (uint32_t)data[1] << 8 | (uint32_t)data[2] << 16;
+	}
+	return pal;
+}
 struct LPPalette* lp_pal_load_i(const char* fn, void* data, size_t sz)
 {
 	// palette only formats
@@ -111,6 +138,7 @@ struct LPPalette* lp_pal_load_i(const char* fn, void* data, size_t sz)
 	if (sz > 8 && strncmp("\211PNG\r\n\032\n", data, 8) == 0) return lp_pal_load_png(data, sz);
 	if (sz > 128 && ((uint8_t*)data)[0] == 10 && ((uint8_t*)data)[2] == 1) return lp_pal_load_pcx(data, sz);
 	if (sz > 54 && strncmp("BM", data, 2) == 0) return lp_pal_load_bmp(data, sz);
+	if (sz > 18 && ((uint8_t*)data)[1] == 1) return lp_pal_load_tga(data, sz);
 	return 0;
 }
 struct LPPalette* lp_pal_load(const char* fn, void* data, size_t sz)
