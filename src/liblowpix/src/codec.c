@@ -101,7 +101,7 @@ void* lp_dec_rle(void* data, size_t* data_sz)
 	if (!data || !data_sz || *data_sz <= 0) return 0;
 
 	// Get and check header word
-	uint32_t header = lp_read_u32_le(&data);
+	uint32_t header = lp_read_u32_lep(&data);
 	if ((uint8_t)header != LP_CODEC_RLE) return 0;
 
 	uint32_t ii, dstS = header >> 8, size = 0;
@@ -554,7 +554,7 @@ void* lp_dec_lz77(void* data, size_t* data_sz)
 	if (!data || !data_sz || *data_sz <= 0) return 0;
 
 	// Get and check header word
-	uint32_t header = lp_read_u32_le(&data);
+	uint32_t header = lp_read_u32_lep(&data);
 	if ((uint8_t)header != LP_CODEC_LZ77) return 0;
 
 	uint32_t flags;

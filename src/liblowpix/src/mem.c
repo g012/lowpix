@@ -39,7 +39,7 @@ fail1:
 	CloseHandle(hFile);
 	return 0;
 }
-void lp_unmap(struct LPFileMap* fmap)
+void lp_munmap(struct LPFileMap* fmap)
 {
 	struct LPFileMapI* m = (struct LPFileMapI*)fmap;
 	UnmapViewOfFile(m->mem);
@@ -64,7 +64,7 @@ fail1:
 	close(fd);
 	return 0;
 }
-void lp_unmap(struct LPFileMap* fmap)
+void lp_munmap(struct LPFileMap* fmap)
 {
 	struct LPFileMapI* m = (struct LPFileMapI*)fmap;
 	munmap(m->mem, (size_t)m->size);
