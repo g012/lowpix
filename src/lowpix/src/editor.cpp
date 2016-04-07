@@ -98,7 +98,7 @@ void LPE_Tick(char* droppedFiles)
 	for (LPEPalNode* paln = lpe.pal_l; paln; paln = paln->next)
 	{
 		struct LPPalette* pal = paln->pal;
-		if (ImGui::BeginDock(drpath_file_name(paln->filename)))
+		if (ImGui::BeginDock(drpath_file_name(paln->filename), false))
 		{
 			ImGui::PushID(pal);
 			uint32_t* c = pal->col;

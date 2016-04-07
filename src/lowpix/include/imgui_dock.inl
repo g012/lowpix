@@ -50,6 +50,7 @@ namespace ImGui
 				, status(Status_Float)
 				, label(nullptr)
 				, opened(false)
+				, save(true)
 			{
 				children[0] = children[1] = nullptr;
 			}
@@ -184,6 +185,7 @@ namespace ImGui
 			ImVec2 size;
 			Status_ status;
 			bool opened;
+			bool save;
 			bool first;
 			int last_frame;
 			int invalid_frames;
@@ -222,6 +224,7 @@ namespace ImGui
 			new_dock->first = true;
 			new_dock->last_frame = 0;
 			new_dock->invalid_frames = 0;
+			doDock(*new_dock, getRootDock(), Slot_Tab); // LP_MOD don't want floating for new panes
 			return *new_dock;
 		}
 
@@ -833,9 +836,10 @@ namespace ImGui
 		}
 
 
-		bool begin(const char* label, bool* opened, ImGuiWindowFlags extra_flags)
+		bool begin(const char* label, bool save, bool* opened, ImGuiWindowFlags extra_flags)
 		{
 			Dock& dock = getDock(label, !opened || *opened);
+			dock.save = save;
 			dock.last_frame = ImGui::GetFrameCount();
 			if (strcmp(dock.label, label) != 0)
 			{
@@ -846,7 +850,6 @@ namespace ImGui
 			m_end_action = EndAction_None;
 
 			if (dock.first && opened) *opened = dock.opened;
-			//bool wasFirst = dock.first;
 			dock.first = false;
 			if (opened && !*opened)
 			{
@@ -860,7 +863,6 @@ namespace ImGui
 			}
 			dock.opened = true;
 
-			//if (wasFirst && !dock.parent) doDock(dock, getRootDock()->children[0] ? getRootDock()->children[0] : getRootDock(), Slot_Tab); // LP_MOD don't want floating for new panes TODO FIXME
 			m_end_action = EndAction_Panel;
 			beginPanel();
 
@@ -955,6 +957,7 @@ namespace ImGui
 			for (int i = 0; i < m_docks.size(); ++i)
 			{
 				Dock& dock = *m_docks[i];
+				if (!dock.save) continue;
 				fprintf(f, "dock%llu = {\n", (uint64_t)&dock);
 				fprintf(f, "index = %d,\n", i);
 				fprintf(f, "label = \"%s\",\n", dock.label);
@@ -1097,9 +1100,9 @@ namespace ImGui
 	}
 
 
-	bool BeginDock(const char* label, bool* opened, ImGuiWindowFlags extra_flags)
+	bool BeginDock(const char* label, bool save, bool* opened, ImGuiWindowFlags extra_flags)
 	{
-		return g_dock.begin(label, opened, extra_flags);
+		return g_dock.begin(label, save, opened, extra_flags);
 	}
 
 
