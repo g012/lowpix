@@ -46,7 +46,7 @@ static void LPE_Dialog_OpenPalette(void)
 	}
 }
 
-void LPE_Tick(void)
+void LPE_Tick(char* droppedFiles)
 {
 	//ImGui::ShowTestWindow(0);return;
 
@@ -54,10 +54,9 @@ void LPE_Tick(void)
 	ImGuiStyle& style = ImGui::GetStyle();
 	static const ImGuiStyle styledef;
 
-//	io.MouseDrawCursor = !(CXApplication_state.window.flags & CX_APPLICATIONWINDOWF_MOUSEOUTSIDE);
-//	CXApplicationInput_SetMouseCursorVisibility(!io.MouseDrawCursor);
-
 	bool show_options = false;
+
+	for (; *droppedFiles; droppedFiles += strlen(droppedFiles)+1) LPE_OpenPalette(droppedFiles);
 
 	style.Colors[ImGuiCol_MenuBarBg] = lpe.need_save ? ImVec4(142.0f / 255.0f, 218.0f / 255.0f, 140.0f / 255.0f, styledef.Colors[ImGuiCol_MenuBarBg].w) : styledef.Colors[ImGuiCol_MenuBarBg];
 	if (ImGui::BeginMainMenuBar())

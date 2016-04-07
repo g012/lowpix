@@ -2,17 +2,33 @@
 #include "imgui_impl_glfw_gl3.h"
 #include "lua.hpp"
 #include <stdio.h>
+#include <stdlib.h>
 #include <thread>
 #include <GL/gl3w.h>
 #include <GLFW/glfw3.h>
 
 #define CONF "lowpix.lua"
 
-extern void LPE_Tick(void);
+extern void LPE_Tick(char* droppedFiles);
 
 static void error_callback(int error, const char* description)
 {
     fprintf(stderr, "Error %d: %s\n", error, description);
+}
+
+static char* s_droppedFiles = 0;
+void drop_callback(GLFWwindow* window, int count, const char** paths)
+{
+	size_t bufsz = count * 1024, w = 0;
+	s_droppedFiles = (char*)realloc(s_droppedFiles, bufsz);
+	for (int i = 0; i < count; i++)
+	{
+		size_t sz = strlen(paths[i]) + 1;
+		if (w + sz >= bufsz) break;
+		strcpy(s_droppedFiles + w, paths[i]);
+		w += sz;
+	}
+	s_droppedFiles[w] = 0;
 }
 
 int main(int, char**)
@@ -47,6 +63,8 @@ int main(int, char**)
     GLFWwindow* window = glfwCreateWindow(window_w, window_h, "lowpix", NULL, NULL);
     glfwMakeContextCurrent(window);
     gl3wInit();
+	glfwSetDropCallback(window, drop_callback);
+	s_droppedFiles = (char*)calloc(1, 2);
 
     // Setup ImGui binding
     ImGui_ImplGlfwGL3_Init(window, true);
@@ -65,7 +83,8 @@ int main(int, char**)
         glfwPollEvents();
         ImGui_ImplGlfwGL3_NewFrame();
 
-		LPE_Tick();
+		LPE_Tick(s_droppedFiles);
+		s_droppedFiles[0] = 0, s_droppedFiles[1] = 0;
 
         // Rendering
         int display_w, display_h;
