@@ -1,34 +1,48 @@
 #include "lowpix.h"
 #include "imgui.h"
+#include "tinyfiledialogs.h"
+#define DR_PATH_IMPLEMENTATION
+#include "dr_path.h"
 
-#ifdef WIN32
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
-#define NOC_FILE_DIALOG_WIN32
-#elif defined(__APPLE_CC__) || defined(__APPLE__) || defined(__MACH__)
-#define NOC_FILE_DIALOG_OSX
-#else
-#define NOC_FILE_DIALOG_GTK
-#endif
-#define NOC_FILE_DIALOG_IMPLEMENTATION
-#include "noc_file_dialog.h"
-
+struct LPEPalNode { LPEPalNode *next, *prev; struct LPPalette* pal; char* filename; };
 static struct LPE
 {
 	bool exit;
 	bool need_save;
-	struct LPPalette* pal;
+	int pal_c;
+	struct LPEPalNode* pal_l;
 } lpe = { 0 };
 
-static void LPE_OpenPalette(void)
+static LPEPalNode* LPE_AddPalette(struct LPPalette* pal)
 {
-	if (const char* fn = noc_file_dialog_open(NOC_FILE_DIALOG_OPEN, "All\0*.*\0Photoshop Palette\0*.act\0BMP\0*.bmp\0GIF\0*.gif\0GIMP Palette\0*.gpl\0Microsoft Palette\0*.pal\0PCX\0*.pcx\0PNG\0*.png\0TGA\0*.tga\0", 0, 0))
+	LPEPalNode* n = (LPEPalNode*)lp_zalloc(sizeof(*lpe.pal_l)); n->pal = pal;
+	if (lpe.pal_l) lpe.pal_l->prev = n;
+	n->next = lpe.pal_l; lpe.pal_l = n;
+	++lpe.pal_c; return n;
+}
+static void LPE_RemPalette(LPEPalNode* n)
+{
+	if (n->prev) n->prev->next = n->next; if (n->next) n->next->prev = n->prev;
+	if (n == lpe.pal_l) lpe.pal_l = 0;
+	lp_alloc(n->pal, 0); lp_alloc(n, 0);
+	--lpe.pal_c;
+}
+static void LPE_OpenPalette(const char* fn)
+{
+	if (struct LPPalette* pal = lp_pal_load(fn, 0, 0))
 	{
-		if (struct LPPalette* pal = lp_pal_load(fn, 0, 0))
-		{
-			if (lpe.pal) lp_alloc(lpe.pal, 0);
-			lpe.pal = pal;
-		}
+		LPEPalNode* n = LPE_AddPalette(pal);
+		n->filename = strdup(fn);
+	}
+}
+static void LPE_Dialog_OpenPalette(void)
+{	
+	//"All (*.*)\0*.*\0Photoshop Palette (*.act)\0*.act\0BMP (*.bmp)\0*.bmp\0GIF (*.gif)\0*.gif\0GIMP Palette (*.gpl)\0*.gpl\0Microsoft Palette (*.pal)\0*.pal\0PCX (*.pcx)\0*.pcx\0PNG (*.png)\0*.png\0TGA (*.tga)\0*.tga\0"
+	static const char* formats[] = { "*.act", "*.bmp", "*.gif", "*.gpl", "*.pal", "*.pcx", "*.png", "*.tga" };
+	if (char* fns = const_cast<char*>(tinyfd_openFileDialog("Open Palette or Image File", "", sizeof(formats) / sizeof(*formats), formats, "Image or Palette Files", 1)))
+	{
+		for (char* fn = strtok(fns, "|"); fn; fn = strtok(0, "|"))
+			LPE_OpenPalette(fn);
 	}
 }
 
@@ -40,6 +54,9 @@ void LPE_Tick(void)
 	ImGuiStyle& style = ImGui::GetStyle();
 	static const ImGuiStyle styledef;
 
+//	io.MouseDrawCursor = !(CXApplication_state.window.flags & CX_APPLICATIONWINDOWF_MOUSEOUTSIDE);
+//	CXApplicationInput_SetMouseCursorVisibility(!io.MouseDrawCursor);
+
 	bool show_options = false;
 
 	style.Colors[ImGuiCol_MenuBarBg] = lpe.need_save ? ImVec4(142.0f / 255.0f, 218.0f / 255.0f, 140.0f / 255.0f, styledef.Colors[ImGuiCol_MenuBarBg].w) : styledef.Colors[ImGuiCol_MenuBarBg];
@@ -48,7 +65,7 @@ void LPE_Tick(void)
 		if (ImGui::BeginMenu("FILE"))
 		{
 			if (ImGui::MenuItem("New")) { }
-			if (ImGui::MenuItem("Open")) { LPE_OpenPalette(); }
+			if (ImGui::MenuItem("Open")) { LPE_Dialog_OpenPalette(); }
 			if (ImGui::MenuItem("Save", "Ctrl+S", nullptr, lpe.need_save)) { }
 			if (ImGui::MenuItem("Save As..", nullptr, nullptr, false)) { }
 			ImGui::Separator();
@@ -79,17 +96,20 @@ void LPE_Tick(void)
 		ImGui::RootDock(pos, size);
 	}
 
-	if (ImGui::BeginDock("Palette"))
+	for (LPEPalNode* paln = lpe.pal_l; paln; paln = paln->next)
 	{
-		if (lpe.pal)
+		struct LPPalette* pal = paln->pal;
+		if (ImGui::BeginDock(drpath_file_name(paln->filename)))
 		{
-			uint32_t* c = lpe.pal->col;
-			for (uint32_t i = 0; i < lpe.pal->col_count; ++i)
+			ImGui::PushID(pal);
+			uint32_t* c = pal->col;
+			for (uint32_t i = 0; i < pal->col_count; ++i)
 			{
-				ImGui::ColorButton(ImColor(c[i] | 0xFF<<24).Value, true, false);
+				ImGui::ColorButton(ImColor(c[i]).Value, false, false, false);
 				if ((i+1)%16 > 0) ImGui::SameLine();
 			}
+			ImGui::PopID();
 		}
+		ImGui::EndDock();
 	}
-	ImGui::EndDock();
 }

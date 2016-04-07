@@ -29,6 +29,7 @@ static int          g_ShaderHandle = 0, g_VertHandle = 0, g_FragHandle = 0;
 static int          g_AttribLocationTex = 0, g_AttribLocationProjMtx = 0;
 static int          g_AttribLocationPosition = 0, g_AttribLocationUV = 0, g_AttribLocationColor = 0;
 static unsigned int g_VboHandle = 0, g_VaoHandle = 0, g_ElementsHandle = 0;
+static GLFWcursor*  g_Cursors[8];
 
 // This is the main rendering function that you have to implement and provide to ImGui (via setting up 'RenderDrawListsFn' in the ImGuiIO structure)
 // If text or lines are blurry when integrating ImGui in your engine:
@@ -335,6 +336,8 @@ bool    ImGui_ImplGlfwGL3_Init(GLFWwindow* window, bool install_callbacks)
         glfwSetCharCallback(window, ImGui_ImplGlfwGL3_CharCallback);
     }
 
+	for (int i = 0; i < sizeof(g_Cursors) / sizeof(*g_Cursors); ++i) g_Cursors[i] = glfwCreateStandardCursor(0x00036001 + i);
+
     return true;
 }
 
@@ -388,6 +391,9 @@ void ImGui_ImplGlfwGL3_NewFrame()
 
     // Hide OS mouse cursor if ImGui is drawing it
     glfwSetInputMode(g_Window, GLFW_CURSOR, io.MouseDrawCursor ? GLFW_CURSOR_HIDDEN : GLFW_CURSOR_NORMAL);
+
+	static int cursorMap[] = { 0, 1, 3, 5, 4, 7, 6 };
+	glfwSetCursor(g_Window, g_Cursors[cursorMap[ImGui::GetMouseCursor()]]);
 
     // Start the frame
     ImGui::NewFrame();

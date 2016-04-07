@@ -51,6 +51,10 @@ static NSCursor* getStandardCursor(int shape)
             return [NSCursor resizeLeftRightCursor];
         case GLFW_VRESIZE_CURSOR:
             return [NSCursor resizeUpDownCursor];
+        case GLFW_NWSERESIZE_CURSOR:
+            return [NSCursor resizeUpDownCursor];
+        case GLFW_NESWRESIZE_CURSOR:
+            return [NSCursor resizeUpDownCursor];
     }
 
     return nil;

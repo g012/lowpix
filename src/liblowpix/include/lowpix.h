@@ -15,6 +15,7 @@ extern "C" {
 // MEM
 // define LP_ALLOC_CUSTOM to override with your own
 extern void* lp_alloc(void* ptr, size_t nsize);
+extern void* lp_zalloc(size_t size); // init mem to 0
 
 struct LPFileMap { void* mem; uint64_t size; };
 extern struct LPFileMap* lp_mmap(const char* filename);

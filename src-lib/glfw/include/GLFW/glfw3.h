@@ -717,6 +717,9 @@ extern "C" {
  *  The vertical resize arrow shape.
  */
 #define GLFW_VRESIZE_CURSOR         0x00036006
+// LP EXTRAS
+#define GLFW_NWSERESIZE_CURSOR         0x00036007
+#define GLFW_NESWRESIZE_CURSOR         0x00036008
 /*! @} */
 
 #define GLFW_CONNECTED              0x00040001

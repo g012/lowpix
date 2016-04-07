@@ -846,6 +846,7 @@ namespace ImGui
 			m_end_action = EndAction_None;
 
 			if (dock.first && opened) *opened = dock.opened;
+			//bool wasFirst = dock.first;
 			dock.first = false;
 			if (opened && !*opened)
 			{
@@ -859,6 +860,7 @@ namespace ImGui
 			}
 			dock.opened = true;
 
+			//if (wasFirst && !dock.parent) doDock(dock, getRootDock()->children[0] ? getRootDock()->children[0] : getRootDock(), Slot_Tab); // LP_MOD don't want floating for new panes TODO FIXME
 			m_end_action = EndAction_Panel;
 			beginPanel();
 

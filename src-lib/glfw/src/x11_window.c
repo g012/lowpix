@@ -124,6 +124,10 @@ static int translateCursorShape(int shape)
             return XC_sb_h_double_arrow;
         case GLFW_VRESIZE_CURSOR:
             return XC_sb_v_double_arrow;
+        case GLFW_NWSERESIZE_CURSOR:
+            return XC_bottom_right_corner;
+        case GLFW_NESWRESIZE_CURSOR:
+            return XC_bottom_left_corner;
     }
 
     return 0;

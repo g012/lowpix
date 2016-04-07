@@ -39,7 +39,7 @@ workspace "lowpix"
     project "glfw"
         kind "StaticLib"
         language "C"
-        files { "src-lib/glfw/src/*.h", "src-lib/glfw/include/GL/glfw.h",
+        files { "src-lib/glfw/src/*.h", "src-lib/glfw/include/**.h",
             "src-lib/glfw/src/context.c",
             "src-lib/glfw/src/init.c",
             "src-lib/glfw/src/input.c",

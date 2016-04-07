@@ -666,6 +666,10 @@ const char* getSystemCursorName(int shape)
             return mir_horizontal_resize_cursor_name;
         case GLFW_VRESIZE_CURSOR:
             return mir_vertical_resize_cursor_name;
+        case GLFW_NWSERESIZE_CURSOR:
+            return mir_diagonal_resize_top_to_bottom_cursor_name;
+        case GLFW_NESWRESIZE_CURSOR:
+            return mir_diagonal_resize_bottom_to_top_cursor_name;
     }
 
     return NULL;

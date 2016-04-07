@@ -307,6 +307,10 @@ static char *translateCursorShape(int shape)
             return "sb_h_double_arrow";
         case GLFW_VRESIZE_CURSOR:
             return "sb_v_double_arrow";
+        case GLFW_NWSERESIZE_CURSOR:
+            return "top_left_corner";
+        case GLFW_NESWRESIZE_CURSOR:
+            return "top_right_corner";
     }
     return NULL;
 }

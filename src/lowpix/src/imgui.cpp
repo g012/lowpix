@@ -8530,7 +8530,7 @@ void ImGui::EndMenu()
 
 // A little colored square. Return true when clicked.
 // FIXME: May want to display/ignore the alpha component in the color display? Yet show it in the tooltip.
-bool ImGui::ColorButton(const ImVec4& col, bool small_height, bool outline_border)
+bool ImGui::ColorButton(const ImVec4& col, bool small_height, bool outline_border, bool show_alpha)
 {
     ImGuiWindow* window = GetCurrentWindow();
     if (window->SkipItems)
@@ -8547,10 +8547,15 @@ bool ImGui::ColorButton(const ImVec4& col, bool small_height, bool outline_borde
 
     bool hovered, held;
     bool pressed = ButtonBehavior(bb, id, &hovered, &held);
-    RenderFrame(bb.Min, bb.Max, GetColorU32(col), outline_border, style.FrameRounding);
+    RenderFrame(bb.Min, bb.Max, GetColorU32(col) + (show_alpha ? 0 : 0xFF << 24), outline_border, style.FrameRounding);
 
     if (hovered)
-        ImGui::SetTooltip("Color:\n(%.2f,%.2f,%.2f,%.2f)\n#%02X%02X%02X%02X", col.x, col.y, col.z, col.w, IM_F32_TO_INT8(col.x), IM_F32_TO_INT8(col.y), IM_F32_TO_INT8(col.z), IM_F32_TO_INT8(col.z));
+	{
+		if (show_alpha)
+			ImGui::SetTooltip("Color:\n(%.2f,%.2f,%.2f,%.2f)\n#%02X%02X%02X%02X", col.x, col.y, col.z, col.w, IM_F32_TO_INT8(col.x), IM_F32_TO_INT8(col.y), IM_F32_TO_INT8(col.z), IM_F32_TO_INT8(col.w)); // LP_FIX col.w was col.z
+		else
+			ImGui::SetTooltip("Color:\n(%.2f,%.2f,%.2f)\n#%02X%02X%02X", col.x, col.y, col.z, IM_F32_TO_INT8(col.x), IM_F32_TO_INT8(col.y), IM_F32_TO_INT8(col.z));
+	}
 
     return pressed;
 }

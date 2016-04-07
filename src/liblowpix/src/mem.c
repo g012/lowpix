@@ -17,6 +17,12 @@ void* lp_alloc(void* ptr, size_t nsize)
 	else return realloc(ptr, nsize);
 }
 #endif
+void* lp_zalloc(size_t size)
+{
+	void* p = lp_alloc(0, size);
+	memset(p, 0, size);
+	return p;
+}
 
 #ifdef WIN32
 struct LPFileMapI
