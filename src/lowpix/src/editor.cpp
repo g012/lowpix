@@ -98,13 +98,19 @@ void LPE_Tick(char* droppedFiles)
 	for (LPEPalNode* paln = lpe.pal_l; paln; paln = paln->next)
 	{
 		struct LPPalette* pal = paln->pal;
-		if (ImGui::BeginDock(drpath_file_name(paln->filename), false))
+		char dock_name[256];
+		snprintf(dock_name, sizeof(dock_name), "%s##%p", drpath_file_name(paln->filename), pal);
+		dock_name[sizeof(dock_name)-1] = 0;
+		if (ImGui::BeginDock(dock_name, false))
 		{
 			ImGui::PushID(pal);
 			uint32_t* c = pal->col;
 			for (uint32_t i = 0; i < pal->col_count; ++i)
 			{
-				ImGui::ColorButton(ImColor(c[i]).Value, false, false, false);
+				uint32_t col = c[i];
+				ImVec4 colf = ImColor(col).Value;
+				ImGui::ColorButton(colf, false, true, false);
+				if (ImGui::IsItemHovered()) ImGui::SetTooltip("Entry %d [0x%X]\n#%02X%02X%02X (%.2f,%.2f,%.2f)", i, i, col&0xFF, (col>>8)&0xFF, (col>>16)&0xFF, colf.x, colf.y, colf.z);
 				if ((i+1)%16 > 0) ImGui::SameLine();
 			}
 			ImGui::PopID();

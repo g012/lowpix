@@ -95,9 +95,24 @@ workspace "lowpix"
         defines { "GLEW_STATIC" }
 
         filter "system:windows"
+            files { "src/lowpix/**.rc" }
             links { "opengl32" }
+
+        filter "system:macosx"
+            postbuildcommands {
+                "{DELETE} -r lowpix.app",
+                "{MKDIR} lowpix.app/Contents/MacOS",
+				"{MKDIR} lowpix.app/Contents/Resources",
+                "{COPY} %{cfg.buildtarget.abspath} lowpix.app/Contents/MacOS/lowpix",
+				"{COPY} ../../../../src/lowpix/res/osx/icon.icns lowpix.app/Contents/Resources",
+				"/usr/libexec/PlistBuddy -c 'Add :CFBundleName string lowpix' lowpix.app/Contents/Info.plist",
+				"/usr/libexec/PlistBuddy -c 'Add :CFBundleExecutable string lowpix' lowpix.app/Contents/Info.plist",
+				"/usr/libexec/PlistBuddy -c 'Add :CFBundleIconFile string lowpix.icns' lowpix.app/Contents/Info.plist",
+				"/usr/libexec/PlistBuddy -c 'Add :CFBundleIdentifier string flush.lowpix' lowpix.app/Contents/Info.plist",
+				"/usr/libexec/PlistBuddy -c 'Add :CFBundleShortVersionString string 0.2.1' lowpix.app/Contents/Info.plist",
+				"/usr/libexec/PlistBuddy -c 'Add :NSHighResolutionCapable bool YES' lowpix.app/Contents/Info.plist"
+            }                
             
         filter "action:vs*"
             disablewarnings { "4103", "4456", "4554", "4577", "6255", "6262", "28278" }
             buildoptions { "/volatile:iso" }
-            

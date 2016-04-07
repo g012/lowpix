@@ -1,0 +1,1 @@
+convert icon/icon_16x16.png icon/icon_32x32.png icon/icon_48x48.png icon/icon_256x256.png icon.ico

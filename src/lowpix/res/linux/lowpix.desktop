@@ -1,0 +1,7 @@
+[Desktop Entry]
+Name=lowpix
+Exec=lowpix #/usr/bin/lowpix
+Terminal=false
+Icon=lowpix #/usr/local/share/icons/hicolor/256x256/apps/lowpix.png
+Type=Application
+Categories=Application;

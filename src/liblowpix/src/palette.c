@@ -14,18 +14,19 @@ static struct LPPalette* lp_pal_load_pal(uint8_t* data, size_t sz) // microsoft 
 	struct LPPalette* pal = lp_alloc(0, offsetof(struct LPPalette, col[cc]));
 	pal->col_count = cc;
 	for (uint32_t i = 0; i < cc; ++i, data += 4)
-		pal->col[i] = (uint32_t)data[0] << 16 | (uint32_t)data[1] << 8 | (uint32_t)data[2]; // 4th byte is flags, unused
+		pal->col[i] = (uint32_t)data[0] | (uint32_t)data[1] << 8 | (uint32_t)data[2] << 16; // 4th byte is flags, unused
 	return pal;
 }
 static struct LPPalette* lp_pal_load_gpl(uint8_t* data, size_t sz) // gimp .gpl
 {
 	size_t i = 0;
 	for (int ln = 0; i < sz && ln < 4; ++i) if (data[i] == '\n') ++ln;
-	uint32_t cc = 1;
+	uint32_t cc = 0;
 	for (size_t j = i; j < sz; ++j) if (data[j] == '\n') ++cc;
+	if (cc > LP_PALCC_MAX) cc = LP_PALCC_MAX;
 	struct LPPalette* pal = lp_alloc(0, offsetof(struct LPPalette, col[cc]));
 	pal->col_count = cc;
-	for (int c = 0; i < sz; ++c, ++i)
+	for (uint32_t c = 0; i < sz && c < cc; ++c, ++i)
 	{
 		int r, g, b;
 		sscanf(data + i, "%d %d %d", &r, &g, &b);
@@ -36,7 +37,7 @@ static struct LPPalette* lp_pal_load_gpl(uint8_t* data, size_t sz) // gimp .gpl
 }
 static struct LPPalette* lp_pal_load_act(uint8_t* data, size_t sz) // photoshop .act
 {
-	if (sz != 256 * 3) return 0;
+	if (sz < 256 * 3) return 0;
 	struct LPPalette* pal = lp_alloc(0, offsetof(struct LPPalette, col[256]));
 	pal->col_count = 256;
 	for (uint32_t i = 0; i < 256; ++i, data += 3)
@@ -45,7 +46,7 @@ static struct LPPalette* lp_pal_load_act(uint8_t* data, size_t sz) // photoshop 
 }
 static struct LPPalette* lp_pal_load_gif(uint8_t* data, size_t sz) // image .gif
 {
-	if (sz < 12 || (data[5] != '9' && data[5] != '7') || data[6] != 'a' || !(data[10] & 0x80)) return 0;
+	if (sz < 12 || (data[4] != '9' && data[4] != '7') || data[5] != 'a' || !(data[10] & 0x80)) return 0;
 	uint32_t cc = 2 << (data[10] & 7);
 	data += 13;
 	struct LPPalette* pal = lp_alloc(0, offsetof(struct LPPalette, col[cc]));
@@ -93,7 +94,7 @@ static struct LPPalette* lp_pal_load_bmp(uint8_t* data, size_t sz) // image .bmp
 {
 	uint32_t cc = lp_read_u32_le(data + 46);
 	if (cc == 0) return 0;
-	data += 54;
+	data += 14 + lp_read_u32_le(data + 14);
 	struct LPPalette* pal = lp_alloc(0, offsetof(struct LPPalette, col[cc]));
 	pal->col_count = cc;
 	for (uint32_t i = 0; i < cc; ++i, data += 4)
@@ -102,16 +103,16 @@ static struct LPPalette* lp_pal_load_bmp(uint8_t* data, size_t sz) // image .bmp
 }
 static struct LPPalette* lp_pal_load_tga(uint8_t* data, size_t sz) // image .tga
 {
-	if (data[2] != 1 || data[2] != 9) return 0; // not palette based
+	if (data[2] != 1 && data[2] != 9) return 0; // not palette based
 	int i = 18 + lp_read_u16_le(data+3); if (sz <= i) return 0;
 	uint32_t cc = lp_read_u16_le(data+5);
 	if (cc > LP_PALCC_MAX) cc = LP_PALCC_MAX;
 	int bpp = data[7];
-	if (bpp != 15 && bpp != 24 && bpp != 32) return 0;
+	if (bpp != 15 && bpp != 16 && bpp != 24 && bpp != 32) return 0;
 	data += i;
 	struct LPPalette* pal = lp_alloc(0, offsetof(struct LPPalette, col[cc]));
 	pal->col_count = cc;
-	if (bpp == 15) // RGB 5-5-5
+	if (bpp == 15 || bpp == 16) // RGB 5-5-5
 	{
 		for (uint32_t i = 0; i < cc; ++i, data += 2)
 		{
@@ -123,7 +124,7 @@ static struct LPPalette* lp_pal_load_tga(uint8_t* data, size_t sz) // image .tga
 	{
 		int inc = bpp == 24 ? 3 : 4;
 		for (uint32_t i = 0; i < cc; ++i, data += inc)
-			pal->col[i] = (uint32_t)data[0] | (uint32_t)data[1] << 8 | (uint32_t)data[2] << 16;
+			pal->col[i] = (uint32_t)data[0] << 16 | (uint32_t)data[1] << 8 | (uint32_t)data[2];
 	}
 	return pal;
 }
