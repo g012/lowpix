@@ -21,6 +21,14 @@ uint16_t lp_col5(uint32_t col)
 		b = (((col>>16)&0xFF)*31 + 0x80) / 255;
 	return (uint16_t)(r | g<<5 | b<<10);
 }
+uint32_t lp_col8(uint16_t col)
+{
+	uint32_t 
+		r = ((col&31)*255 + 0xF) / 31,
+		g = (((col>>5)&31)*255 + 0xF) / 31,
+		b = (((col>>10)&31)*255 + 0xF) / 31;
+	return (uint32_t)(r | g<<8 | b<<16);
+}
 
 static void lp_pal_save_bin(struct LPPalette* pal, FILE* f, const char* name, const char* h)
 {
@@ -291,4 +299,13 @@ struct LPPalette* lp_pal_unique(struct LPPalette* pal)
 		if (j == npal->col_count) npal->col[npal->col_count++] = pal->col[i];
 	}
 	return lp_alloc(npal, offsetof(struct LPPalette, col[npal->col_count]));
+}
+
+struct LPPalette* lp_pal_restrict(struct LPPalette* pal)
+{
+	struct LPPalette* npal = lp_alloc(0, offsetof(struct LPPalette, col[pal->col_count]));
+	npal->col_count = pal->col_count;
+	for (uint32_t i = 0; i < pal->col_count; ++i)
+		npal->col[i] = lp_col8(lp_col5(pal->col[i]));
+	return npal;
 }

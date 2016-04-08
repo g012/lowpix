@@ -45,7 +45,7 @@ int main(int, char**)
 				if (lua_getfield(L, -1, "height") == LUA_TNUMBER) window_h = (int)lua_tonumber(L, -1); lua_pop(L, 1);
 			}
 			lua_pop(L, 1);
-			ImGui::LoadDock(L);
+			//ImGui::LoadDock(L);
 		}
 		lua_close(L);
 	}

@@ -167,6 +167,8 @@ void LPE_Tick(char* droppedFiles)
 			if (ImGui::Button("CLONE", btn_sz)) LPE_AddPalette(lp_pal_clone(pal))->need_save = true;
 			ImGui::SameLine();
 			if (ImGui::Button("UNIQUE", btn_sz)) LPE_AddPalette(lp_pal_unique(pal))->need_save = true;
+			ImGui::SameLine();
+			if (ImGui::Button("RGB555", btn_sz)) LPE_AddPalette(lp_pal_restrict(pal))->need_save = true;
 
 			uint32_t* c = pal->col;
 			for (uint32_t i = 0; i < pal->col_count; ++i)

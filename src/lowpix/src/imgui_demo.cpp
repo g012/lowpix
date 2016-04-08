@@ -2407,8 +2407,8 @@ static void ShowExampleAppLongText(bool* opened)
 // End of Demo code
 #else
 
-void ImGui::ShowTestWindow(bool*) {}
-void ImGui::ShowUserGuide(bool*) {}
-void ImGui::ShowStyleEditor(bool*) {}
+//void ImGui::ShowTestWindow(bool*) {}
+//void ImGui::ShowUserGuide(bool*) {}
+//void ImGui::ShowStyleEditor(bool*) {}
 
 #endif

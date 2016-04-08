@@ -224,7 +224,7 @@ namespace ImGui
 			new_dock->first = true;
 			new_dock->last_frame = 0;
 			new_dock->invalid_frames = 0;
-			//doDock(*new_dock, getRootDock(), Slot_Tab); // LP_MOD don't want floating for new panes
+			doDock(*new_dock, getRootDock(), Slot_Tab); // LP_MOD don't want floating for new panes
 			return *new_dock;
 		}
 
