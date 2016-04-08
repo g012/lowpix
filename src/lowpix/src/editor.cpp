@@ -10,6 +10,7 @@ struct LPEPalNode
 	struct LPPalette* pal;
 	char* filename;
 	bool need_save;
+	uint32_t edit_ix;
 };
 static struct LPE
 {
@@ -171,14 +172,27 @@ void LPE_Tick(char* droppedFiles)
 			if (ImGui::Button("RGB555", btn_sz)) LPE_AddPalette(lp_pal_restrict(pal))->need_save = true;
 
 			uint32_t* c = pal->col;
+			if (paln->edit_ix < pal->col_count)
+			{
+				uint32_t col = c[paln->edit_ix];
+				ImVec4 colf = ImColor(col | 0xFF<<24).Value;
+				ImGui::BeginGroup();
+				if (ImGui::ColorPicker(&colf.x, false)) { c[paln->edit_ix] = (ImU32)ImColor(colf); paln->need_save = true; }
+				ImGui::EndGroup();
+				ImGui::SameLine();
+			}
+			ImGui::BeginGroup();
 			for (uint32_t i = 0; i < pal->col_count; ++i)
 			{
 				uint32_t col = c[i];
 				ImVec4 colf = ImColor(col | 0xFF<<24).Value;
-				ImGui::ColorButton(colf);
+				ImGui::PushID(i);
+				if (ImGui::ColorButton(colf)) paln->edit_ix = i;
 				if (ImGui::IsItemHovered()) ImGui::SetTooltip("Entry %d [0x%X]\n#%02X%02X%02X (%.2f,%.2f,%.2f)", i, i, col&0xFF, (col>>8)&0xFF, (col>>16)&0xFF, colf.x, colf.y, colf.z);
-				if ((i+1)%16 > 0) ImGui::SameLine();
+				if ((i+1)%16 > 0 && i < pal->col_count-1) ImGui::SameLine();
+				ImGui::PopID();
 			}
+			ImGui::EndGroup();
 
 			ImGui::PopID();
 		}
