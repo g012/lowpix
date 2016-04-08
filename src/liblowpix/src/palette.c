@@ -1,9 +1,106 @@
+#include <ctype.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <string.h>
 #include "lowpix.h"
 
+// for parsing/writing foreign file formats, not for general editing
 #define LP_PALCC_MAX (256)
+
+#ifdef WIN32
+#define LP_SECPATHSEP '\\'
+#else
+#define LP_SECPATHSEP '/'
+#endif
+
+uint16_t lp_col5(uint32_t col)
+{
+	uint32_t 
+		r = ((col&0xFF)*31 + 0x80) / 255,
+		g = (((col>>8)&0xFF)*31 + 0x80) / 255,
+		b = (((col>>16)&0xFF)*31 + 0x80) / 255;
+	return (uint16_t)(r | g<<5 | b<<10);
+}
+
+static void lp_pal_save_bin(struct LPPalette* pal, FILE* f, const char* name, const char* h)
+{
+	for (uint32_t i = 0; i < pal->col_count; ++i)
+	{
+		uint8_t b[3] = { pal->col[i] & 0xFF, (pal->col[i]>>8) & 0xFF, (pal->col[i]>>16) & 0xFF };
+		fwrite(b, 1, 3, f);
+	}
+}
+static void lp_pal_save_act(struct LPPalette* pal, FILE* f, const char* name, const char* h)
+{
+	uint32_t i;
+	for (i = 0; i < pal->col_count && i < 256; ++i)
+	{
+		uint8_t b[3] = { pal->col[i] & 0xFF, (pal->col[i]>>8) & 0xFF, (pal->col[i]>>16) & 0xFF };
+		fwrite(b, 1, 3, f);
+	}
+	uint32_t v = 0;
+	for (; i < 256; ++i)
+		fwrite(&v, 1, 3, f);
+}
+static void lp_pal_save_gpl(struct LPPalette* pal, FILE* f, const char* name, const char* h)
+{
+	fprintf(f, "GIMP Palette\nName: %s\nColumns: 0\n#\n", name);
+	for (uint32_t i = 0; i < pal->col_count; ++i)
+		fprintf(f, "%*d %*d %*d Untitled\n", 3, pal->col[i] & 0xFF, 3, (pal->col[i]>>8) & 0xFF, 3, (pal->col[i]>>16) & 0xFF);
+}
+static void lp_pal_save_asm(struct LPPalette* pal, FILE* f, const char* name, const char* h)
+{
+	fprintf(f, "\t.section .rodata\n\t.align 2\n\t.global %s\n\t.hidden %s\n%s:", name, name, name);
+	for (uint32_t i = 0; i < pal->col_count; ++i)
+	{
+		if (i%8 == 0) fprintf(f, "\n\t.hword ");
+		fprintf(f, "0x%04X%s", lp_col5(pal->col[i]), (i+1)%8==0 || i == pal->col_count - 1 ? "" : ",");
+	}
+	FILE* fh = fopen(h, "wb");
+	if (fh)
+	{
+		char uname[256]; for (int i = 0; i <= strlen(name); ++i) uname[i] = (char)toupper(name[i]);
+		fprintf(fh, "#ifndef LPGEN_%s_H\n#define LPGEN_%s_H\n\n#define %s_size (%d)\nextern const u16 %s[0x%X];\n\n#endif\n",
+			uname, uname, name, pal->col_count*2, name, pal->col_count);
+		fclose(fh);
+	}
+}
+static void lp_pal_save_c(struct LPPalette* pal, FILE* f, const char* name, const char* h)
+{
+	char uname[256]; for (int i = 0; i <= strlen(name); ++i) uname[i] = (char)toupper(name[i]);
+	fprintf(f, "#ifndef LPGEN_%s_H\n#define LPGEN_%s_H\n\n#define %s_size (%d)\nextern const u16 %s[0x%X];\n\n#endif\n\n#ifdef %s_IMPLEMENTATION\n\nu16 %s[%d] = {",
+			uname, uname, name, pal->col_count*2, name, pal->col_count, uname, name, pal->col_count);
+	for (uint32_t i = 0; i < pal->col_count; ++i)
+		fprintf(f, "%s0x%04X%s", i%8==0 ? "\n\t" : "", lp_col5(pal->col[i]), i < pal->col_count - 1 ? "," : "");
+	fprintf(f, "\n};\n\n#endif\n");
+}
+int lp_pal_save(struct LPPalette* pal, const char* fn, enum LPPaletteFormat format)
+{
+	if (pal->col_count <= 0) return 0;
+	char name[256];
+	size_t len = strlen(fn), name_s = 0, name_e = len, i;
+	for (size_t i = name_e; i >= 0; --i) { if (fn[i] == '.') name_e = i; if (fn[i] == '/' || fn[i] == LP_SECPATHSEP) { name_s = i+1; break; } }
+	if (name_s >= name_e || name_e - name_s >= sizeof(name)) return 0;
+	strncpy(name, fn + name_s, name_e - name_s);
+	name[name_e - name_s] = 0;
+	if (format == LP_PALETTEFORMAT_EXT)
+	{
+		if (name_e <= 0 || name_e >= len - 1) return 0;
+		static const char* exts[] = { "bin", "act", "gpl", "s", "c" };
+		format = LP_PALETTEFORMAT_BIN;
+		for (int i = 0; i < sizeof(exts) / sizeof(*exts); ++i) { if (strncmp(exts[i], fn + name_e + 1, strlen(exts[i])) == 0) { format = (enum LPPaletteFormat)i; break; } }
+	}
+	FILE* f = fopen(fn, "wb"); if (!f) return 0;
+	char* h = lp_alloc(0, strlen(fn)+3);
+	strcpy(h, fn);
+	for (i = len-1; i >= 0; --i) { if (h[i] == '.') { h[i+1] = 'h'; h[i+2] = 0; break; } }
+	if (i < 0) h[len] = '.', h[len+1] = 'h', h[len+2] = 0;
+	static void (*writers[])(struct LPPalette* pal, FILE* f, const char* name, const char* fn) = { lp_pal_save_bin, lp_pal_save_act, lp_pal_save_gpl, lp_pal_save_asm, lp_pal_save_c };
+	writers[format](pal, f, name, h);
+	lp_alloc(h, 0);
+	fclose(f);
+	return 1;
+}
 
 static struct LPPalette* lp_pal_load_pal(uint8_t* data, size_t sz) // microsoft .pal
 {
@@ -33,6 +130,15 @@ static struct LPPalette* lp_pal_load_gpl(uint8_t* data, size_t sz) // gimp .gpl
 		pal->col[c] = r | g << 8 | b << 16;
 		for (; i < sz && data[i] != '\n'; ++i);
 	}
+	return pal;
+}
+static struct LPPalette* lp_pal_load_bin(uint8_t* data, size_t sz) // raw .bin
+{
+	uint32_t cc = (uint32_t)sz / 3; if (cc == 0) return 0;
+	struct LPPalette* pal = lp_alloc(0, offsetof(struct LPPalette, col[cc]));
+	pal->col_count = cc;
+	for (uint32_t i = 0; i < cc; ++i, data += 3)
+		pal->col[i] = (uint32_t)data[0] | (uint32_t)data[1] << 8 | (uint32_t)data[2] << 16;
 	return pal;
 }
 static struct LPPalette* lp_pal_load_act(uint8_t* data, size_t sz) // photoshop .act
@@ -133,6 +239,7 @@ struct LPPalette* lp_pal_load_i(const char* fn, void* data, size_t sz)
 	// palette only formats
 	if (sz > 24 && strncmp("RIFF", data, 4) == 0 && strncmp("PAL data", (uint8_t*)data + 8, 8) == 0) return lp_pal_load_pal(data, sz);
 	if (sz > 12 && strncmp("GIMP Palette", data, 12) == 0) return lp_pal_load_gpl(data, sz);
+	if (fn && strnicmp(".bin", &fn[strlen(fn) - 4], 4) == 0) return lp_pal_load_bin(data, sz);
 	if (fn && strnicmp(".act", &fn[strlen(fn) - 4], 4) == 0) return lp_pal_load_act(data, sz);
 	// image formats containing palette
 	if (sz > 4 && strncmp("GIF8", data, 4) == 0) return lp_pal_load_gif(data, sz);
@@ -153,4 +260,35 @@ struct LPPalette* lp_pal_load(const char* fn, void* data, size_t sz)
 	struct LPPalette* pal = lp_pal_load_i(fn, data, sz);
 	if (fmap) lp_munmap(fmap);
 	return pal;
+}
+
+struct LPPalette* lp_pal_clone(struct LPPalette* pal)
+{
+	struct LPPalette* npal = lp_alloc(0, offsetof(struct LPPalette, col[pal->col_count]));
+	npal->col_count = pal->col_count;
+	memcpy(npal->col, pal->col, pal->col_count * sizeof(*pal->col));
+	return npal;
+}
+
+struct LPPalette* lp_pal_concat(struct LPPalette* pal1, struct LPPalette* pal2)
+{
+	uint32_t cc = pal1->col_count + pal2->col_count;
+	struct LPPalette* pal = lp_alloc(0, offsetof(struct LPPalette, col[cc]));
+	pal->col_count = cc;
+	memcpy(pal->col, pal1->col, pal1->col_count * sizeof(*pal->col));
+	memcpy(pal->col + pal1->col_count, pal2->col, pal2->col_count * sizeof(*pal->col));
+	return pal;
+}
+
+struct LPPalette* lp_pal_unique(struct LPPalette* pal)
+{
+	struct LPPalette* npal = lp_alloc(0, offsetof(struct LPPalette, col[pal->col_count]));
+	npal->col_count = 0;
+	for (uint32_t i = 0; i < pal->col_count; ++i)
+	{
+		uint32_t j;
+		for (j = 0; j < npal->col_count && pal->col[i] != npal->col[j]; ++j);
+		if (j == npal->col_count) npal->col[npal->col_count++] = pal->col[i];
+	}
+	return lp_alloc(npal, offsetof(struct LPPalette, col[npal->col_count]));
 }
