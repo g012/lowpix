@@ -11,6 +11,7 @@ struct LPEPalNode
 	char* filename;
 	bool need_save;
 	uint32_t edit_ix;
+	uint32_t selectend_ix;
 };
 static struct LPE
 {
@@ -187,7 +188,17 @@ void LPE_Tick(char* droppedFiles)
 				uint32_t col = c[i];
 				ImVec4 colf = ImColor(col | 0xFF<<24).Value;
 				ImGui::PushID(i);
-				if (ImGui::ColorButton(colf)) paln->edit_ix = i;
+				ImGui::PushStyleColor(ImGuiCol_Border, i >= paln->edit_ix && i <= paln->selectend_ix ? ImColor(0xFF00FF00).Value : styledef.Colors[ImGuiCol_Border]);
+				if (ImGui::ColorButton(colf))
+				{
+					if (!io.KeyShift) paln->edit_ix = paln->selectend_ix = i;
+					else
+					{
+						paln->selectend_ix = i;
+						if (paln->selectend_ix < paln->edit_ix) { uint32_t t = paln->selectend_ix; paln->selectend_ix = paln->edit_ix; paln->edit_ix = t; }
+					}
+				}
+				ImGui::PopStyleColor();
 				if (ImGui::IsItemHovered()) ImGui::SetTooltip("Entry %d [0x%X]\n#%02X%02X%02X (%.2f,%.2f,%.2f)", i, i, col&0xFF, (col>>8)&0xFF, (col>>16)&0xFF, colf.x, colf.y, colf.z);
 				if ((i+1)%16 > 0 && i < pal->col_count-1) ImGui::SameLine();
 				ImGui::PopID();

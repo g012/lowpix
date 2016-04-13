@@ -29,6 +29,15 @@ uint32_t lp_col8(uint16_t col)
 		b = (((col>>10)&31)*255 + 0xF) / 31;
 	return (uint32_t)(r | g<<8 | b<<16);
 }
+uint32_t lp_colf(float r, float g, float b)
+{ return (uint32_t)(r*255+0.5f) | (uint32_t)(g*255+0.5f)<<8 | (uint32_t)(b*255+0.5f)<<16; }
+uint32_t lp_col_lerp(uint32_t col1, uint32_t col2, float x)
+{
+	float r1 = (col1 & 0xFF) / 255.0f, g1 = (col1>>8 & 0xFF) / 255.0f, b1 = (col1>>16 & 0xFF) / 255.0f;
+	float r2 = (col2 & 0xFF) / 255.0f, g2 = (col2>>8 & 0xFF) / 255.0f, b2 = (col2>>16 & 0xFF) / 255.0f;
+	float r = r1 + (r2-r1)*x, g = g1 + (g2-g1)*x, b = b1 + (b2-b1)*x;
+	return lp_colf(r, g, b);
+}
 
 static void lp_pal_save_bin(struct LPPalette* pal, FILE* f, const char* name, const char* h)
 {
@@ -308,4 +317,18 @@ struct LPPalette* lp_pal_restrict(struct LPPalette* pal)
 	for (uint32_t i = 0; i < pal->col_count; ++i)
 		npal->col[i] = lp_col8(lp_col5(pal->col[i]));
 	return npal;
+}
+
+struct LPPalette* lp_pal_lerp(struct LPPalette* pal1, struct LPPalette* pal2, float x)
+{
+	uint32_t cc = pal1->col_count > pal2->col_count ? pal1->col_count : pal2->col_count;
+	struct LPPalette* pal = lp_alloc(0, offsetof(struct LPPalette, col[cc]));
+	pal->col_count = cc;
+	for (uint32_t i = 0; i < cc; ++i)
+	{
+		uint32_t col1 = i < pal1->col_count ? pal1->col[i] : pal2->col[i];
+		uint32_t col2 = i < pal2->col_count ? pal2->col[i] : pal1->col[i];
+		pal->col[i] = lp_col_lerp(col1, col2, x);
+	}
+	return pal;
 }

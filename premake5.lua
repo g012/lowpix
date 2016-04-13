@@ -92,6 +92,7 @@ workspace "lowpix"
 
         includedirs { "src/lowpix/include", "src/liblowpix/include", "src-lib/lua", "src-lib/glfw/include" }
         files { "src/lowpix/**.h", "src/lowpix/**.inl", "src/lowpix/**.cpp", "src/lowpix/**.c" }
+        removefiles { "src/lowpix/src/*_gl3.cpp" }
         defines { "GLEW_STATIC" }
 
         filter "system:windows"

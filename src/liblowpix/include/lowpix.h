@@ -57,12 +57,15 @@ enum LPPaletteFormat
 struct LPPalette { uint32_t col_count; uint32_t col[1]; /* overallocated */ };
 extern uint16_t lp_col5(uint32_t col);
 extern uint32_t lp_col8(uint16_t col);
+extern uint32_t lp_colf(float r, float g, float b);
+extern uint32_t lp_col_lerp(uint32_t col1, uint32_t col2, float x);
 extern int lp_pal_save(struct LPPalette* pal, const char* fn, enum LPPaletteFormat format);
 extern struct LPPalette* lp_pal_load(const char* fn, void* data, size_t sz);
 extern struct LPPalette* lp_pal_clone(struct LPPalette* pal);
 extern struct LPPalette* lp_pal_concat(struct LPPalette* pal1, struct LPPalette* pal2);
 extern struct LPPalette* lp_pal_unique(struct LPPalette* pal);
 extern struct LPPalette* lp_pal_restrict(struct LPPalette* pal);
+extern struct LPPalette* lp_pal_lerp(struct LPPalette* pal1, struct LPPalette* pal2, float x);
 
 #ifdef __cplusplus
 }

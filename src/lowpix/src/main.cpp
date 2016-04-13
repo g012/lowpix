@@ -1,10 +1,11 @@
 #include "imgui.h"
-#include "imgui_impl_glfw_gl3.h"
+//#include "imgui_impl_glfw_gl3.h"
+#include "imgui_impl_glfw.h"
 #include "lua.hpp"
 #include <stdio.h>
 #include <stdlib.h>
 #include <thread>
-#include <GL/gl3w.h>
+//#include <GL/gl3w.h>
 #include <GLFW/glfw3.h>
 
 #define CONF "lowpix.lua"
@@ -31,7 +32,7 @@ void drop_callback(GLFWwindow* window, int count, const char** paths)
 	s_droppedFiles[w] = 0;
 }
 
-int main(int, char**)
+int main(int argc, char* argv[])
 {
 	int window_w = 1280, window_h = 720;
 
@@ -54,20 +55,21 @@ int main(int, char**)
     glfwSetErrorCallback(error_callback);
     if (!glfwInit())
         return 1;
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    //glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    //glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    //glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 #if __APPLE__
-    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+    //glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
     GLFWwindow* window = glfwCreateWindow(window_w, window_h, "lowpix", NULL, NULL);
     glfwMakeContextCurrent(window);
-    gl3wInit();
+    //gl3wInit();
 	glfwSetDropCallback(window, drop_callback);
 	s_droppedFiles = (char*)calloc(1, 2);
 
     // Setup ImGui binding
-    ImGui_ImplGlfwGL3_Init(window, true);
+    //ImGui_ImplGlfwGL3_Init(window, true);
+    ImGui_ImplGlfw_Init(window, true);
 	glfwSwapInterval(0);
 
     ImVec4 clear_color = ImColor(114, 144, 154);
@@ -81,7 +83,8 @@ int main(int, char**)
     while (!glfwWindowShouldClose(window))
     {
         glfwPollEvents();
-        ImGui_ImplGlfwGL3_NewFrame();
+        //ImGui_ImplGlfwGL3_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
 
 		LPE_Tick(s_droppedFiles);
 		s_droppedFiles[0] = 0, s_droppedFiles[1] = 0;
@@ -119,7 +122,8 @@ int main(int, char**)
 	}
 
     // Cleanup
-    ImGui_ImplGlfwGL3_Shutdown();
+    //ImGui_ImplGlfwGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
     glfwTerminate();
 
     return 0;
