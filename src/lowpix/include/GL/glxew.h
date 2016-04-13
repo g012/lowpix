@@ -525,24 +525,6 @@ extern void ( * glXGetProcAddressARB (const GLubyte *procName)) (void);
 
 #endif /* GLX_ARB_vertex_buffer_object */
 
-/* ------------------------------------  ----------------------------------- */
-
-#ifndef 
-#define  1
-
-#define  GLXEW_GET_VAR()
-
-#endif /*  */
-
-/* ------------------------------------  ----------------------------------- */
-
-#ifndef 
-#define  1
-
-#define  GLXEW_GET_VAR()
-
-#endif /*  */
-
 /* --------------------------- GLX_EXT_buffer_age -------------------------- */
 
 #ifndef GLX_EXT_buffer_age
@@ -873,15 +855,6 @@ typedef GLboolean ( * PFNGLXSET3DFXMODEMESAPROC) (GLint mode);
 
 #endif /* GLX_MESA_set_3dfx_mode */
 
-/* ------------------------------------  ----------------------------------- */
-
-#ifndef 
-#define  1
-
-#define  GLXEW_GET_VAR()
-
-#endif /*  */
-
 /* --------------------------- GLX_NV_copy_buffer -------------------------- */
 
 #ifndef GLX_NV_copy_buffer
@@ -985,16 +958,6 @@ typedef Bool ( * PFNGLXRESETFRAMECOUNTNVPROC) (Display* dpy, int screen);
 #define GLXEW_NV_swap_group GLXEW_GET_VAR(__GLXEW_NV_swap_group)
 
 #endif /* GLX_NV_swap_group */
-
-/* ------------------------------------  ----------------------------------- */
-
-#ifndef 
-#define  1
-
-#define  GLXEW_GET_VAR()
-
-#endif /*  */
-
 /* -------------------------- GLX_NV_video_capture ------------------------- */
 
 #ifndef GLX_NV_video_capture
@@ -1123,15 +1086,6 @@ typedef Bool ( * PFNGLXWAITFORSBCOMLPROC) (Display* dpy, GLXDrawable drawable, i
 
 #endif /* GLX_SGIS_multisample */
 
-/* ------------------------------------  ----------------------------------- */
-
-#ifndef 
-#define  1
-
-#define  GLXEW_GET_VAR()
-
-#endif /*  */
-
 /* --------------------------- GLX_SGIX_fbconfig --------------------------- */
 
 #ifndef GLX_SGIX_fbconfig
@@ -1169,15 +1123,6 @@ typedef XVisualInfo* ( * PFNGLXGETVISUALFROMFBCONFIGSGIXPROC) (Display *dpy, GLX
 #define GLXEW_SGIX_fbconfig GLXEW_GET_VAR(__GLXEW_SGIX_fbconfig)
 
 #endif /* GLX_SGIX_fbconfig */
-
-/* ------------------------------------  ----------------------------------- */
-
-#ifndef 
-#define  1
-
-#define  GLXEW_GET_VAR()
-
-#endif /*  */
 
 /* ---------------------------- GLX_SGIX_pbuffer --------------------------- */
 
@@ -1361,15 +1306,6 @@ typedef Status ( * PFNGLXGETTRANSPARENTINDEXSUNPROC) (Display* dpy, Window overl
 
 #endif /* GLX_SUN_get_transparent_index */
 
-/* ------------------------------------  ----------------------------------- */
-
-#ifndef 
-#define  1
-
-#define  GLXEW_GET_VAR()
-
-#endif /*  */
-
 /* ------------------------------------------------------------------------- */
 
 #define GLXEW_FUN_EXPORT GLEW_FUN_EXPORT
@@ -1521,8 +1457,6 @@ GLXEW_VAR_EXPORT GLboolean __GLXEW_ARB_multisample;
 GLXEW_VAR_EXPORT GLboolean __GLXEW_ARB_robustness_application_isolation;
 GLXEW_VAR_EXPORT GLboolean __GLXEW_ARB_robustness_share_group_isolation;
 GLXEW_VAR_EXPORT GLboolean __GLXEW_ARB_vertex_buffer_object;
-GLXEW_VAR_EXPORT GLboolean ;
-GLXEW_VAR_EXPORT GLboolean ;
 GLXEW_VAR_EXPORT GLboolean __GLXEW_EXT_buffer_age;
 GLXEW_VAR_EXPORT GLboolean __GLXEW_EXT_create_context_es2_profile;
 GLXEW_VAR_EXPORT GLboolean __GLXEW_EXT_create_context_es_profile;
@@ -1543,7 +1477,6 @@ GLXEW_VAR_EXPORT GLboolean __GLXEW_MESA_pixmap_colormap;
 GLXEW_VAR_EXPORT GLboolean __GLXEW_MESA_query_renderer;
 GLXEW_VAR_EXPORT GLboolean __GLXEW_MESA_release_buffers;
 GLXEW_VAR_EXPORT GLboolean __GLXEW_MESA_set_3dfx_mode;
-GLXEW_VAR_EXPORT GLboolean ;
 GLXEW_VAR_EXPORT GLboolean __GLXEW_NV_copy_buffer;
 GLXEW_VAR_EXPORT GLboolean __GLXEW_NV_copy_image;
 GLXEW_VAR_EXPORT GLboolean __GLXEW_NV_delay_before_swap;
@@ -1551,7 +1484,6 @@ GLXEW_VAR_EXPORT GLboolean __GLXEW_NV_float_buffer;
 GLXEW_VAR_EXPORT GLboolean __GLXEW_NV_multisample_coverage;
 GLXEW_VAR_EXPORT GLboolean __GLXEW_NV_present_video;
 GLXEW_VAR_EXPORT GLboolean __GLXEW_NV_swap_group;
-GLXEW_VAR_EXPORT GLboolean ;
 GLXEW_VAR_EXPORT GLboolean __GLXEW_NV_video_capture;
 GLXEW_VAR_EXPORT GLboolean __GLXEW_NV_video_out;
 GLXEW_VAR_EXPORT GLboolean __GLXEW_OML_swap_method;
@@ -1559,9 +1491,7 @@ GLXEW_VAR_EXPORT GLboolean __GLXEW_OML_sync_control;
 GLXEW_VAR_EXPORT GLboolean __GLXEW_SGIS_blended_overlay;
 GLXEW_VAR_EXPORT GLboolean __GLXEW_SGIS_color_range;
 GLXEW_VAR_EXPORT GLboolean __GLXEW_SGIS_multisample;
-GLXEW_VAR_EXPORT GLboolean ;
 GLXEW_VAR_EXPORT GLboolean __GLXEW_SGIX_fbconfig;
-GLXEW_VAR_EXPORT GLboolean ;
 GLXEW_VAR_EXPORT GLboolean __GLXEW_SGIX_pbuffer;
 GLXEW_VAR_EXPORT GLboolean __GLXEW_SGIX_swap_barrier;
 GLXEW_VAR_EXPORT GLboolean __GLXEW_SGIX_swap_group;
@@ -1572,7 +1502,6 @@ GLXEW_VAR_EXPORT GLboolean __GLXEW_SGI_make_current_read;
 GLXEW_VAR_EXPORT GLboolean __GLXEW_SGI_swap_control;
 GLXEW_VAR_EXPORT GLboolean __GLXEW_SGI_video_sync;
 GLXEW_VAR_EXPORT GLboolean __GLXEW_SUN_get_transparent_index;
-GLXEW_VAR_EXPORT GLboolean ;
 /* ------------------------------------------------------------------------ */
 
 GLEWAPI GLenum GLEWAPIENTRY glxewInit ();

@@ -6,8 +6,10 @@
 #include <sys/mman.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <unistd.h>
 #endif
 #include <stdlib.h>
+#include <string.h>
 #include "lowpix.h"
 
 #ifndef LP_ALLOC_CUSTOM
@@ -53,7 +55,7 @@ void lp_munmap(struct LPFileMap* fmap)
 	CloseHandle(m->file);
 }
 #else
-struct LPFileMap
+struct LPFileMapI
 {
 	void* mem;
 	uint64_t size;
@@ -64,7 +66,7 @@ struct LPFileMap* lp_mmap(const char* filename)
 	int fd = open(filename, O_RDONLY, 0); if (fd < 0) return 0;
 	struct stat statbuf; if (fstat(fd, &statbuf) != 0) goto fail1;
 	void* mem = mmap(0, statbuf.st_size, PROT_READ, MAP_PRIVATE | MAP_FILE, fd, 0); if (mem == MAP_FAILED) goto fail1;
-	struct LPFileMap* m = lp_alloc(0, sizeof(*m)); m->mem = mem, m->size = statbuf.st_size, m->fd = fd;
+	struct LPFileMapI* m = lp_alloc(0, sizeof(*m)); m->mem = mem, m->size = statbuf.st_size, m->fd = fd;
 	return (struct LPFileMap*)m;
 fail1:
 	close(fd);

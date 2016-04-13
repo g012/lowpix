@@ -83,7 +83,7 @@ static LPEDialogResult LPE_Dialog_NeedSave(const char* name, const char* content
 	if (ImGui::BeginPopupModal(name, 0, ImGuiWindowFlags_AlwaysAutoResize))
 	{
 		ImVec2 size(80, 0);
-		ImGui::Text(content);
+		ImGui::Text("%s", content);
 		if (ImGui::Button("YES", size)) { r = LPE_DIALOG_YES; ImGui::CloseCurrentPopup(); }
 		ImGui::SameLine();
 		if (ImGui::Button("NO", size)) { r = LPE_DIALOG_NO; ImGui::CloseCurrentPopup(); }

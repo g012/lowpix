@@ -1,7 +1,6 @@
 #include "imgui.h"
 #include "imgui_internal.h"
 #include <stdint.h>
-#include <new.h>
 
 namespace ImGui
 {
@@ -958,7 +957,7 @@ namespace ImGui
 			{
 				Dock& dock = *m_docks[i];
 				if (!dock.save) continue;
-				fprintf(f, "dock%llu = {\n", (uint64_t)&dock);
+				fprintf(f, "dock%llu = {\n", (unsigned long long int)&dock);
 				fprintf(f, "index = %d,\n", i);
 				fprintf(f, "label = \"%s\",\n", dock.label);
 				fprintf(f, "x = %d,\n", (int32_t)dock.pos.x);

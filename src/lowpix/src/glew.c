@@ -16188,8 +16188,6 @@ GLboolean __GLXEW_ARB_multisample = GL_FALSE;
 GLboolean __GLXEW_ARB_robustness_application_isolation = GL_FALSE;
 GLboolean __GLXEW_ARB_robustness_share_group_isolation = GL_FALSE;
 GLboolean __GLXEW_ARB_vertex_buffer_object = GL_FALSE;
-GLboolean  = GL_FALSE;
-GLboolean  = GL_FALSE;
 GLboolean __GLXEW_EXT_buffer_age = GL_FALSE;
 GLboolean __GLXEW_EXT_create_context_es2_profile = GL_FALSE;
 GLboolean __GLXEW_EXT_create_context_es_profile = GL_FALSE;
@@ -16210,7 +16208,6 @@ GLboolean __GLXEW_MESA_pixmap_colormap = GL_FALSE;
 GLboolean __GLXEW_MESA_query_renderer = GL_FALSE;
 GLboolean __GLXEW_MESA_release_buffers = GL_FALSE;
 GLboolean __GLXEW_MESA_set_3dfx_mode = GL_FALSE;
-GLboolean  = GL_FALSE;
 GLboolean __GLXEW_NV_copy_buffer = GL_FALSE;
 GLboolean __GLXEW_NV_copy_image = GL_FALSE;
 GLboolean __GLXEW_NV_delay_before_swap = GL_FALSE;
@@ -16218,7 +16215,6 @@ GLboolean __GLXEW_NV_float_buffer = GL_FALSE;
 GLboolean __GLXEW_NV_multisample_coverage = GL_FALSE;
 GLboolean __GLXEW_NV_present_video = GL_FALSE;
 GLboolean __GLXEW_NV_swap_group = GL_FALSE;
-GLboolean  = GL_FALSE;
 GLboolean __GLXEW_NV_video_capture = GL_FALSE;
 GLboolean __GLXEW_NV_video_out = GL_FALSE;
 GLboolean __GLXEW_OML_swap_method = GL_FALSE;
@@ -16226,9 +16222,7 @@ GLboolean __GLXEW_OML_sync_control = GL_FALSE;
 GLboolean __GLXEW_SGIS_blended_overlay = GL_FALSE;
 GLboolean __GLXEW_SGIS_color_range = GL_FALSE;
 GLboolean __GLXEW_SGIS_multisample = GL_FALSE;
-GLboolean  = GL_FALSE;
 GLboolean __GLXEW_SGIX_fbconfig = GL_FALSE;
-GLboolean  = GL_FALSE;
 GLboolean __GLXEW_SGIX_pbuffer = GL_FALSE;
 GLboolean __GLXEW_SGIX_swap_barrier = GL_FALSE;
 GLboolean __GLXEW_SGIX_swap_group = GL_FALSE;
@@ -16239,7 +16233,6 @@ GLboolean __GLXEW_SGI_make_current_read = GL_FALSE;
 GLboolean __GLXEW_SGI_swap_control = GL_FALSE;
 GLboolean __GLXEW_SGI_video_sync = GL_FALSE;
 GLboolean __GLXEW_SUN_get_transparent_index = GL_FALSE;
-GLboolean  = GL_FALSE;
 #ifdef GLX_VERSION_1_2
 
 static GLboolean _glewInit_GLX_VERSION_1_2 ()
@@ -21719,22 +21712,6 @@ GLboolean glxewIsSupported (const char* name)
         }
 #endif
       }
-      if (_glewStrSame2(&pos, &len, (const GLubyte*)"", ))
-      {
-#ifdef 
-        if (_glewStrSame3(&pos, &len, (const GLubyte*)"", ))
-        {
-          ret = ;
-          continue;
-        }
-#endif
-#ifdef 
-        if (_glewStrSame3(&pos, &len, (const GLubyte*)"", ))
-        {
-          ret = ;
-          continue;
-        }
-#endif
       if (_glewStrSame2(&pos, &len, (const GLubyte*)"EXT_", 4))
       {
 #ifdef GLX_EXT_buffer_age
@@ -21884,15 +21861,6 @@ GLboolean glxewIsSupported (const char* name)
         }
 #endif
       }
-      if (_glewStrSame2(&pos, &len, (const GLubyte*)"", ))
-      {
-#ifdef 
-        if (_glewStrSame3(&pos, &len, (const GLubyte*)"", ))
-        {
-          ret = ;
-          continue;
-        }
-#endif
       if (_glewStrSame2(&pos, &len, (const GLubyte*)"NV_", 3))
       {
 #ifdef GLX_NV_copy_buffer
@@ -21945,15 +21913,6 @@ GLboolean glxewIsSupported (const char* name)
         }
 #endif
       }
-      if (_glewStrSame2(&pos, &len, (const GLubyte*)"", ))
-      {
-#ifdef 
-        if (_glewStrSame3(&pos, &len, (const GLubyte*)"", ))
-        {
-          ret = ;
-          continue;
-        }
-#endif
       if (_glewStrSame2(&pos, &len, (const GLubyte*)"NV_", 3))
       {
 #ifdef GLX_NV_video_capture
@@ -22012,15 +21971,6 @@ GLboolean glxewIsSupported (const char* name)
         }
 #endif
       }
-      if (_glewStrSame2(&pos, &len, (const GLubyte*)"", ))
-      {
-#ifdef 
-        if (_glewStrSame3(&pos, &len, (const GLubyte*)"", ))
-        {
-          ret = ;
-          continue;
-        }
-#endif
       if (_glewStrSame2(&pos, &len, (const GLubyte*)"SGIX_", 5))
       {
 #ifdef GLX_SGIX_fbconfig
@@ -22031,15 +21981,6 @@ GLboolean glxewIsSupported (const char* name)
         }
 #endif
       }
-      if (_glewStrSame2(&pos, &len, (const GLubyte*)"", ))
-      {
-#ifdef 
-        if (_glewStrSame3(&pos, &len, (const GLubyte*)"", ))
-        {
-          ret = ;
-          continue;
-        }
-#endif
       if (_glewStrSame2(&pos, &len, (const GLubyte*)"SGIX_", 5))
       {
 #ifdef GLX_SGIX_pbuffer
@@ -22115,16 +22056,6 @@ GLboolean glxewIsSupported (const char* name)
         if (_glewStrSame3(&pos, &len, (const GLubyte*)"get_transparent_index", 21))
         {
           ret = GLXEW_SUN_get_transparent_index;
-          continue;
-        }
-#endif
-      }
-      if (_glewStrSame2(&pos, &len, (const GLubyte*)"", ))
-      {
-#ifdef 
-        if (_glewStrSame3(&pos, &len, (const GLubyte*)"", ))
-        {
-          ret = ;
           continue;
         }
 #endif
