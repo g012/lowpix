@@ -3044,7 +3044,7 @@ frontmost of process \\\"Python\\\" to true' ''');");
 			newt.c_lflag &= ~ECHO ;
 			tcsetattr(STDIN_FILENO, TCSANOW, & newt);
 		}
-		fgets(lBuff, MAX_PATH_OR_CMD, stdin);
+		char* unused = fgets(lBuff, MAX_PATH_OR_CMD, stdin);
 		if ( ! aDefaultInput )
 		{
 			tcsetattr(STDIN_FILENO, TCSANOW, & oldt);

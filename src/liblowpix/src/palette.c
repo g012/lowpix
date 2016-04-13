@@ -11,6 +11,8 @@
 #define LP_SECPATHSEP '\\'
 #else
 #define LP_SECPATHSEP '/'
+#include <strings.h>
+#define strnicmp strncasecmp
 #endif
 
 uint16_t lp_col5(uint32_t col)

@@ -1,6 +1,6 @@
 local action = _ACTION or ''
 
-flags { "Unicode" }
+flags { "Unicode", "C++11" }
 exceptionhandling "Off"
 rtti "Off"
 strictaliasing "Off"
@@ -20,6 +20,9 @@ workspace "lowpix"
     filter "platforms:x64"
         architecture "x86_64"
     filter {}
+
+    filter { "language:C", "action:gmake" }
+        buildoptions { "-std=gnu99" }
 
     filter "configurations:debug"
         targetsuffix "_d"
@@ -50,8 +53,8 @@ workspace "lowpix"
         includedirs { "src-lib/glfw/src", "src-lib/glfw/include"}
 
         filter "system:linux"
-            files { "src-lib/glfw/src/x11_*.c", "src-lib/glfw/x11_*.h" }
-            defines { "_GLFW_X11", "_GLFW_USE_LINUX_JOYSTICKS", "_GLFW_HAS_XRANDR", "_GLFW_HAS_PTHREAD" ,"_GLFW_HAS_SCHED_YIELD", "_GLFW_HAS_GLXGETPROCADDRESS" }
+            files { "src-lib/glfw/src/x11_*.c", "src-lib/glfw/src/glx_*.c", "src-lib/glfw/src/posix_*.c", "src-lib/glfw/src/linux_*.c", "src-lib/glfw/src/xkb_*.c" }
+            defines { "_GLFW_X11", "_GLFW_GLX", "_GLFW_USE_LINUX_JOYSTICKS", "_GLFW_HAS_XRANDR", "_GLFW_HAS_PTHREAD" ,"_GLFW_HAS_SCHED_YIELD", "_GLFW_HAS_GLXGETPROCADDRESS" }
             buildoptions { "-pthread" }
 
         filter "system:windows"
@@ -69,12 +72,12 @@ workspace "lowpix"
         kind "StaticLib"
         language "C"
 
-        filter "action:vs*"
-            disablewarnings { "4244", "4702" }
-
         includedirs { "src-lib/lua" }
         files { "src-lib/lua/**.h", "src-lib/lua/**.c" }
         removefiles { "src-lib/lua/lua.c", "src-lib/lua/luac.c", "src-lib/lua/print.c" }
+
+        filter "action:vs*"
+            disablewarnings { "4244", "4702" }
 
     project "liblowpix"
         kind "StaticLib"
@@ -99,7 +102,11 @@ workspace "lowpix"
             files { "src/lowpix/**.rc" }
             links { "opengl32" }
 
+        filter "system:linux"
+            links { "X11", "Xrandr", "rt", "GL", "GLU", "pthread", "dl", "Xinerama", "Xcursor" }
+
         filter "system:macosx"
+            linkoptions { "-framework OpenGL", "-framework Cocoa", "-framework IOKit" }
             postbuildcommands {
                 "{DELETE} -r lowpix.app",
                 "{MKDIR} lowpix.app/Contents/MacOS",
